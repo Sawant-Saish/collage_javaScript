@@ -99,6 +99,41 @@ function getGrade(){
 }
 
 
-function factorial(){
+function factorial() {
+	const n = Number(prompt("Enter the number"));
+	let fact = 1;
+	for(i=1;i<=n;i++){
+		fact *= i;
+	}
+	alert("The factorial of "+ n + " is "+ fact);
+}
 
+
+function numbers(){
+	const n = Number(prompt("Enter the break number"));
+	let arr=[];
+	for(i=0;i<10;i++){
+		if(i+1 == n){
+			break;
+		}
+		arr[i]=i+1;
+	}
+	alert(arr);
+}
+
+
+function numbers1(){
+	const n = Number(prompt("Enter the number to skip"));
+	let arr=[];
+	for(i=0;i<10;i++){
+		if(i+1 == n){
+			continue;
+		}
+		else if(i+1 == 8){
+			break;
+		}else{
+			arr[i]=i+1;
+		}
+	}
+	document.querySelector(".parctice-break-continue").innerHTML=arr;
 }
