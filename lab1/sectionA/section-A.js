@@ -137,3 +137,53 @@ function numbers1(){
 	}
 	document.querySelector(".parctice-break-continue").innerHTML=arr;
 }
+
+function menuApp(){
+	let choice;
+
+do {
+  choice = parseInt(prompt("Menu:\n" +"1. Addition\n" +"2. Subtraction\n" +"3. Multiplication\n" +"4. Division\n" +"5. Exit\n" +"Enter your choice:"));
+
+  switch (choice) {
+    case 1:
+      let a1 = parseFloat(prompt("Enter first number:"));
+      let b1 = parseFloat(prompt("Enter second number:"));
+      alert("Result = " + (a1 + b1));
+      break;
+
+    case 2:
+      let a2 = parseFloat(prompt("Enter first number:"));
+      let b2 = parseFloat(prompt("Enter second number:"));
+      alert("Result = " + (a2 - b2));
+      break;
+
+    case 3:
+      let a3 = parseFloat(prompt("Enter first number:"));
+      let b3 = parseFloat(prompt("Enter second number:"));
+      alert("Result = " + (a3 * b3));
+      break;
+
+    case 4:
+      let a4 = parseFloat(prompt("Enter first number:"));
+      let b4 = parseFloat(prompt("Enter second number:"));
+      if (b4 !== 0) {
+        alert("Result = " + (a4 / b4));
+      } else {
+        alert("Division by zero not allowed");
+      }
+      break;
+
+    case 5:
+      alert("Exiting program...");
+      break;
+
+    default:
+      alert("Invalid choice. Try again.");
+  }
+
+} while (choice !== 5);
+}
+
+function loadPage(){
+		window.location.href = "quiz.html";
+}
