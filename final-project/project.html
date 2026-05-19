@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HostelFlow</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',sans-serif;background:#f0f2f5;color:#1a1a2e;min-height:100vh}
+/* ── LANDING ── */
+#landing{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:20px;background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%)}
+#landing h1{color:#e94560;font-size:2.4rem;font-weight:800;letter-spacing:-1px}
+#landing p{color:#aaa;font-size:.95rem}
+.landing-btns{display:flex;gap:16px;margin-top:10px}
+.btn-land{padding:14px 36px;border:none;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;transition:all .2s}
+.btn-admin{background:#e94560;color:#fff}
+.btn-admin:hover{background:#c73652}
+.btn-student{background:rgba(255,255,255,.1);color:#fff;border:2px solid rgba(255,255,255,.2)}
+.btn-student:hover{background:rgba(255,255,255,.2)}
+/* ── AUTH MODAL ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:16px;padding:32px;width:420px;max-width:95vw;position:relative}
+.modal h2{font-size:1.4rem;margin-bottom:6px;color:#1a1a2e}
+.modal .sub{color:#888;font-size:.85rem;margin-bottom:24px}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:.8rem;font-weight:600;color:#555;margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em}
+.field input,.field select,.field textarea{width:100%;padding:10px 14px;border:1.5px solid #ddd;border-radius:8px;font-size:.95rem;outline:none;transition:border .2s;font-family:inherit}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:#e94560}
+.field .hint{font-size:.72rem;color:#aaa;margin-top:3px}
+.field .err-msg{font-size:.72rem;color:#e94560;margin-top:3px;display:none}
+.btn-primary{width:100%;padding:12px;background:#e94560;color:#fff;border:none;border-radius:9px;font-size:1rem;font-weight:700;cursor:pointer;transition:background .2s}
+.btn-primary:hover{background:#c73652}
+.btn-secondary{padding:8px 18px;background:#f0f2f5;color:#333;border:none;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;transition:background .2s}
+.btn-secondary:hover{background:#e2e5ea}
+.btn-danger{padding:8px 18px;background:#fee2e2;color:#dc2626;border:none;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer}
+.btn-danger:hover{background:#fecaca}
+.close-btn{position:absolute;top:14px;right:14px;background:none;border:none;font-size:1.3rem;cursor:pointer;color:#888}
+.modal-footer{margin-top:12px;text-align:center;font-size:.82rem;color:#888}
+.modal-footer a{color:#e94560;cursor:pointer;text-decoration:none;font-weight:600}
+/* ── TOAST ── */
+#toast{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px}
+.toast-item{padding:12px 18px;border-radius:9px;font-size:.85rem;font-weight:600;animation:toastIn .3s ease;max-width:320px}
+.toast-item.success{background:#dcfce7;color:#166534;border:1px solid #bbf7d0}
+.toast-item.error{background:#fee2e2;color:#991b1b;border:1px solid #fecaca}
+.toast-item.info{background:#dbeafe;color:#1e40af;border:1px solid #bfdbfe}
+@keyframes toastIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+/* ── APP SHELL ── */
+#app{display:none;min-height:100vh;flex-direction:column}
+#app.open{display:flex}
+.topbar{background:#1a1a2e;color:#fff;padding:0 24px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.topbar-left{display:flex;align-items:center;gap:16px}
+.topbar h2{font-size:1.1rem;color:#e94560;font-weight:800}
+.topbar-role{font-size:.72rem;background:rgba(233,69,96,.15);color:#e94560;padding:3px 10px;border-radius:20px;border:1px solid rgba(233,69,96,.3)}
+.topbar-user{color:#ccc;font-size:.85rem}
+.btn-logout{padding:6px 14px;background:rgba(255,255,255,.08);color:#ccc;border:1px solid rgba(255,255,255,.12);border-radius:7px;font-size:.8rem;cursor:pointer}
+.btn-logout:hover{background:rgba(255,255,255,.15)}
+/* ── LAYOUT ── */
+.app-body{display:flex;flex:1}
+.sidebar{width:200px;background:#fff;border-right:1px solid #e5e7eb;padding:16px 0;flex-shrink:0}
+.nav-item{padding:11px 20px;cursor:pointer;font-size:.88rem;font-weight:600;color:#555;display:flex;align-items:center;gap:10px;transition:all .15s;border-left:3px solid transparent;user-select:none}
+.nav-item:hover{background:#fef2f4;color:#e94560}
+.nav-item.active{background:#fef2f4;color:#e94560;border-left-color:#e94560}
+.nav-item .badge{background:#e94560;color:#fff;font-size:.65rem;padding:1px 6px;border-radius:10px;margin-left:auto}
+.content{flex:1;padding:28px;overflow-y:auto}
+.page{display:none}
+.page.active{display:block}
+.page-title{font-size:1.4rem;font-weight:800;color:#1a1a2e;margin-bottom:20px}
+/* ── CARDS ── */
+.card{background:#fff;border-radius:14px;border:1px solid #e5e7eb;padding:20px;margin-bottom:20px}
+.card-title{font-size:.95rem;font-weight:700;color:#1a1a2e;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+/* ── STATS ── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.stat-card{background:#fff;border-radius:12px;border:1px solid #e5e7eb;padding:16px 20px}
+.stat-card .num{font-size:1.8rem;font-weight:800;color:#e94560}
+.stat-card .lbl{font-size:.78rem;color:#888;margin-top:2px}
+/* ── TABLE ── */
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th{background:#f8f9fa;padding:10px 14px;text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:#666;border-bottom:1px solid #e5e7eb}
+td{padding:10px 14px;border-bottom:1px solid #f0f2f5;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafafa}
+.tag{display:inline-block;padding:2px 10px;border-radius:20px;font-size:.72rem;font-weight:700}
+.tag-green{background:#dcfce7;color:#166534}
+.tag-yellow{background:#fef9c3;color:#854d0e}
+.tag-red{background:#fee2e2;color:#991b1b}
+.tag-blue{background:#dbeafe;color:#1e40af}
+.tag-gray{background:#f3f4f6;color:#4b5563}
+/* ── ROOM GRID ── */
+.floor-label{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#888;margin:16px 0 8px;display:flex;align-items:center;gap:8px}
+.floor-label::after{content:'';flex:1;height:1px;background:#e5e7eb}
+.rooms-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:10px;margin-bottom:8px}
+.room-cell{border-radius:10px;border:2px solid #e5e7eb;padding:12px 8px;text-align:center;cursor:pointer;transition:all .18s;user-select:none;position:relative;background:#fff}
+.room-cell .rnum{font-size:1rem;font-weight:800;color:#1a1a2e;display:block}
+.room-cell .rcap{font-size:.65rem;color:#aaa;margin-top:2px}
+.room-cell .rocc{font-size:.65rem;font-weight:600;margin-top:3px}
+/* available */
+.room-cell.avail{border-color:#22c55e;background:#f0fdf4}
+.room-cell.avail .rnum{color:#15803d}
+.room-cell.avail .rocc{color:#22c55e}
+.room-cell.avail:hover{background:#dcfce7;transform:translateY(-2px);box-shadow:0 4px 12px rgba(34,197,94,.2)}
+/* mine */
+.room-cell.mine{border-color:#3b82f6;background:#eff6ff}
+.room-cell.mine .rnum{color:#1d4ed8}
+.room-cell.mine::after{content:'✓';position:absolute;top:4px;right:6px;font-size:.7rem;color:#3b82f6;font-weight:900}
+/* full */
+.room-cell.full{border-color:#e5e7eb;background:#f9fafb;cursor:not-allowed;opacity:.7}
+.room-cell.full .rnum{color:#9ca3af}
+/* locked - higher priority hasn't chosen yet */
+.room-cell.locked{border-color:#fbbf24;background:#fffbeb;cursor:not-allowed}
+.room-cell.locked .rnum{color:#d97706}
+.room-cell.locked .rcap{color:#d97706}
+/* selected state during confirm */
+.room-cell.selecting{border-color:#e94560;background:#fff0f3;box-shadow:0 0 0 3px rgba(233,69,96,.15)}
+/* ── ROOM LEGEND ── */
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:16px}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:.76rem;color:#555}
+.legend-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0;border:2px solid}
+.legend-dot.avail{background:#f0fdf4;border-color:#22c55e}
+.legend-dot.mine{background:#eff6ff;border-color:#3b82f6}
+.legend-dot.full{background:#f9fafb;border-color:#e5e7eb}
+.legend-dot.locked{background:#fffbeb;border-color:#fbbf24}
+/* ── NOTICE SECTION ── */
+.notice-list{display:flex;flex-direction:column;gap:12px}
+.notice-item{background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:14px 16px;position:relative}
+.notice-item .notice-title{font-weight:700;font-size:.9rem;color:#92400e}
+.notice-item .notice-body{font-size:.83rem;color:#78350f;margin-top:4px;line-height:1.5}
+.notice-item .notice-date{font-size:.7rem;color:#b45309;margin-top:6px}
+.notice-item .del-notice{position:absolute;top:10px;right:10px;background:none;border:none;cursor:pointer;color:#d97706;font-size:1rem;opacity:.6}
+.notice-item .del-notice:hover{opacity:1}
+/* ── COMPLAINT SECTION ── */
+.complaint-item{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;margin-bottom:12px}
+.complaint-item .c-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.complaint-item .c-from{font-weight:700;font-size:.85rem;color:#1a1a2e}
+.complaint-item .c-body{font-size:.83rem;color:#444;line-height:1.5}
+.complaint-item .c-date{font-size:.7rem;color:#aaa;margin-top:4px}
+/* ── PRIORITY QUEUE ── */
+.queue-item{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:9px;border:1px solid #e5e7eb;margin-bottom:8px;background:#fff}
+.queue-item .q-rank{width:32px;height:32px;border-radius:8px;background:#f0f2f5;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;color:#333;flex-shrink:0}
+.queue-item.q-done .q-rank{background:#dcfce7;color:#15803d}
+.queue-item.q-next .q-rank{background:#fef9c3;color:#854d0e}
+.queue-item .q-info{flex:1}
+.queue-item .q-name{font-weight:700;font-size:.88rem}
+.queue-item .q-meta{font-size:.72rem;color:#888;margin-top:1px}
+.queue-item .q-room{font-size:.82rem;font-weight:600;color:#3b82f6}
+/* ── CONFIRM DIALOG ── */
+#confirm-modal .modal{max-width:360px}
+#confirm-modal .room-preview{background:#f0fdf4;border:2px solid #22c55e;border-radius:12px;padding:20px;text-align:center;margin:16px 0}
+#confirm-modal .room-preview .big{font-size:2.5rem;font-weight:900;color:#15803d}
+#confirm-modal .room-preview .small{font-size:.82rem;color:#4ade80;margin-top:4px}
+/* ── FORMS ── */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.inline-flex{display:flex;gap:10px;align-items:flex-end}
+/* ── MY STATUS ── */
+.my-status-card{background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:14px;padding:24px;color:#fff;margin-bottom:20px}
+.my-status-card .label{font-size:.75rem;color:#aaa;text-transform:uppercase;letter-spacing:.08em}
+.my-status-card .value{font-size:1.5rem;font-weight:800;margin-top:4px}
+.my-status-card .value.green{color:#4ade80}
+.my-status-card .value.yellow{color:#fbbf24}
+.my-status-card .value.red{color:#f87171}
+.my-status-card .sub{font-size:.8rem;color:#aaa;margin-top:6px}
+/* ── EMPTY STATE ── */
+.empty{text-align:center;padding:40px;color:#aaa}
+.empty .eicon{font-size:2.5rem;margin-bottom:10px}
+.empty p{font-size:.88rem}
+/* ── UPLOAD ── */
+.upload-zone{border:2px dashed #d1d5db;border-radius:12px;padding:28px;text-align:center;cursor:pointer;transition:border .2s;background:#fafafa}
+.upload-zone:hover{border-color:#e94560;background:#fff0f3}
+.upload-zone input{display:none}
+.upload-zone p{font-size:.85rem;color:#888;margin-top:6px}
+/* ── MISC ── */
+.divider{border:none;border-top:1px solid #e5e7eb;margin:16px 0}
+.flex{display:flex;align-items:center;gap:10px}
+.ml-auto{margin-left:auto}
+input[type=number]::-webkit-inner-spin-button{opacity:1}
+.priority-banner{background:#fef9c3;border:1px solid #fde68a;border-radius:10px;padding:12px 16px;font-size:.83rem;color:#854d0e;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.room-confirm-info{font-size:.82rem;color:#555;margin-top:4px}
+@media(max-width:700px){.stats-row{grid-template-columns:1fr 1fr}.form-row{grid-template-columns:1fr}.sidebar{display:none}}
+</style>
+</head>
+<body>
+
+<!-- ────── LANDING ────── -->
+<div id="landing">
+  <h1>🏛️ HostelFlow</h1>
+  <p>Room Allotment Management System</p>
+  <div class="landing-btns">
+    <button class="btn-land btn-admin" onclick="openAuth('admin')">Admin Login</button>
+    <button class="btn-land btn-student" onclick="openAuth('student')">Student Portal</button>
+  </div>
+</div>
+
+<!-- ────── AUTH MODAL ────── -->
+<div class="modal-overlay" id="auth-modal">
+  <div class="modal">
+    <button class="close-btn" onclick="closeModal('auth-modal')">✕</button>
+    <h2 id="auth-title">Admin Login</h2>
+    <p class="sub" id="auth-sub">Enter your credentials to continue</p>
+    <!-- Admin login fields -->
+    <div id="admin-fields">
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="a-user" placeholder="admin" oninput="realtimeFeedback(this,'a-user-err',validateUsername)">
+        <div class="err-msg" id="a-user-err"></div>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="a-pass" placeholder="••••••••" oninput="realtimeFeedback(this,'a-pass-err',validatePassword)">
+        <div class="err-msg" id="a-pass-err"></div>
+      </div>
+    </div>
+    <!-- Student fields (login + signup) -->
+    <div id="student-fields" style="display:none">
+      <div id="s-signup-extra" style="display:none">
+        <div class="field">
+          <label>Full Name</label>
+          <input type="text" id="s-name" placeholder="e.g. Arjun Sharma" oninput="realtimeFeedback(this,'s-name-err',validateName)">
+          <div class="err-msg" id="s-name-err"></div>
+        </div>
+        <div class="form-row">
+          <div class="field">
+            <label>Receipt No</label>
+            <input type="text" id="s-receipt" placeholder="RCP-2024-001" oninput="realtimeFeedback(this,'s-receipt-err',validateReceipt)">
+            <div class="err-msg" id="s-receipt-err"></div>
+          </div>
+          <div class="field">
+            <label>CGPA</label>
+            <input type="number" id="s-cgpa" placeholder="9.2" min="0" max="10" step="0.01" oninput="realtimeFeedback(this,'s-cgpa-err',validateCGPA)">
+            <div class="err-msg" id="s-cgpa-err"></div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Branch</label>
+          <input type="text" id="s-branch" placeholder="Computer Science">
+        </div>
+      </div>
+      <div class="field">
+        <label>Username (Student ID)</label>
+        <input type="text" id="s-user" placeholder="e.g. arjun2024" oninput="realtimeFeedback(this,'s-user-err',validateUsername)">
+        <div class="err-msg" id="s-user-err"></div>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="s-pass" placeholder="••••••••" oninput="realtimeFeedback(this,'s-pass-err',validatePassword)">
+        <div class="err-msg" id="s-pass-err"></div>
+      </div>
+    </div>
+    <button class="btn-primary" id="auth-submit" onclick="submitAuth()">Login</button>
+    <div class="modal-footer" id="auth-toggle-row" style="display:none">
+      <span id="auth-toggle-text">Don't have an account?</span>
+      <a onclick="toggleStudentMode()"> <span id="auth-toggle-link">Sign Up</span></a>
+    </div>
+    <div class="modal-footer" style="margin-top:6px;font-size:.75rem">
+      Admin creds: <strong>admin / Admin@123</strong>
+    </div>
+  </div>
+</div>
+
+<!-- ────── ROOM CONFIRM MODAL ────── -->
+<div class="modal-overlay" id="confirm-modal">
+  <div class="modal">
+    <button class="close-btn" onclick="closeModal('confirm-modal')">✕</button>
+    <h2>Confirm Room Selection</h2>
+    <p class="sub">This action cannot be undone</p>
+    <div id="confirm-room-preview" class="room-preview" style="display:none">
+      <div class="big" id="confirm-room-num"></div>
+      <div class="small" id="confirm-room-info"></div>
+    </div>
+    <p style="font-size:.85rem;color:#555;margin-bottom:16px" id="confirm-msg"></p>
+    <div style="display:flex;gap:10px">
+      <button class="btn-secondary" style="flex:1" onclick="closeModal('confirm-modal')">Cancel</button>
+      <button class="btn-primary" style="flex:1" onclick="finaliseRoomSelection()">Confirm Selection</button>
+    </div>
+  </div>
+</div>
+
+<!-- ────── NOTICE ADD MODAL ────── -->
+<div class="modal-overlay" id="notice-modal">
+  <div class="modal">
+    <button class="close-btn" onclick="closeModal('notice-modal')">✕</button>
+    <h2>Post Notice</h2>
+    <p class="sub">This will be visible to all students</p>
+    <div class="field"><label>Title</label><input type="text" id="n-title" placeholder="Important announcement"></div>
+    <div class="field"><label>Message</label><textarea id="n-body" rows="4" placeholder="Write your notice here..." style="resize:vertical"></textarea></div>
+    <button class="btn-primary" onclick="addNotice()">Post Notice</button>
+  </div>
+</div>
+
+<!-- ────── APP SHELL ────── -->
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h2>🏛️ HostelFlow</h2>
+      <div class="topbar-role" id="topbar-role">ADMIN</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px">
+      <span class="topbar-user" id="topbar-user"></span>
+      <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+  </div>
+  <div class="app-body">
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+      <!-- filled by renderSidebar() -->
+    </div>
+    <!-- Content -->
+    <div class="content" id="content">
+      <!-- filled by renderPages() -->
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════
+   DATA STORE  (localStorage-backed)
+═══════════════════════════════════════════ */
+function load(k,def){try{const v=localStorage.getItem(k);return v?JSON.parse(v):def}catch{return def}}
+function save(k,v){localStorage.setItem(k,JSON.stringify(v))}
+
+// seeded rooms: 3 floors × 10 rooms, capacity 2 each
+function initRooms(){
+  const r=[];
+  for(let f=1;f<=3;f++) for(let n=1;n<=10;n++){
+    const id=`${f}0${n<10?'0'+n:n}`;
+    r.push({id,floor:f,num:id,type:n<=3?'Single':n<=8?'Double':'Suite',capacity:n<=3?1:n<=8?2:3,occupants:[]});
+  }
+  return r;
+}
+
+let DB = {
+  students : load('hf_students',[]),   // {id,name,receiptNo,cgpa,branch,username,password,roomId}
+  rooms    : load('hf_rooms', initRooms()),
+  notices  : load('hf_notices',[]),    // {id,title,body,date}
+  complaints: load('hf_complaints',[]) // {id,studentId,studentName,body,date,status}
+};
+function persist(){
+  save('hf_students',DB.students);
+  save('hf_rooms',DB.rooms);
+  save('hf_notices',DB.notices);
+  save('hf_complaints',DB.complaints);
+}
+
+/* ═══════════════════════════════════════════
+   CLASSES
+═══════════════════════════════════════════ */
+class Student {
+  constructor(name,receiptNo,cgpa,branch,username,password){
+    this.id=Date.now()+Math.random();
+    this.name=String(name).trim();
+    this.receiptNo=String(receiptNo).trim().toUpperCase();
+    this.cgpa=parseFloat(cgpa);
+    this.branch=String(branch||'').trim();
+    this.username=String(username).trim().toLowerCase();
+    this.password=String(password);
+    this.roomId=null;
+  }
+  validate(){
+    if(!validateName(this.name).ok) throw new Error(validateName(this.name).msg);
+    if(!validateReceipt(this.receiptNo).ok) throw new Error(validateReceipt(this.receiptNo).msg);
+    if(!validateCGPA(this.cgpa).ok) throw new Error(validateCGPA(this.cgpa).msg);
+    if(!validateUsername(this.username).ok) throw new Error(validateUsername(this.username).msg);
+    if(!validatePassword(this.password).ok) throw new Error(validatePassword(this.password).msg);
+    return true;
+  }
+}
+
+class Notice {
+  constructor(title,body){
+    this.id=Date.now();
+    this.title=String(title).trim();
+    this.body=String(body).trim();
+    this.date=new Date().toLocaleString();
+  }
+}
+
+class Complaint {
+  constructor(studentId,studentName,body){
+    this.id=Date.now();
+    this.studentId=studentId;
+    this.studentName=String(studentName).trim();
+    this.body=String(body).trim();
+    this.date=new Date().toLocaleString();
+    this.status='Open';
+  }
+}
+
+/* ═══════════════════════════════════════════
+   VALIDATION
+═══════════════════════════════════════════ */
+function validateName(v){
+  v=String(v||'').trim();
+  if(!v) return {ok:false,msg:'Name is required'};
+  if(!/^[a-zA-Z\s'.]{2,60}$/.test(v)) return {ok:false,msg:'Letters and spaces only (2-60 chars)'};
+  return {ok:true,msg:''};
+}
+function validateReceipt(v){
+  v=String(v||'').trim().toUpperCase();
+  if(!v) return {ok:false,msg:'Receipt number required'};
+  if(!/^[A-Z0-9\-]{3,20}$/.test(v)) return {ok:false,msg:'Letters, numbers, hyphens (3-20 chars)'};
+  return {ok:true,msg:''};
+}
+function validateCGPA(v){
+  v=parseFloat(v);
+  if(isNaN(v)||v<0||v>10) return {ok:false,msg:'CGPA must be 0.0 – 10.0'};
+  return {ok:true,msg:''};
+}
+function validateUsername(v){
+  v=String(v||'').trim();
+  if(!v) return {ok:false,msg:'Username required'};
+  if(!/^[a-zA-Z][a-zA-Z0-9_]{2,}$/.test(v)) return {ok:false,msg:'Start with a letter; min 3 chars'};
+  return {ok:true,msg:''};
+}
+function validatePassword(v){
+  v=String(v||'');
+  if(v.length<6) return {ok:false,msg:'Min 6 characters required'};
+  return {ok:true,msg:''};
+}
+function realtimeFeedback(el,errId,fn){
+  const r=fn(el.value);
+  const errEl=document.getElementById(errId);
+  if(errEl){errEl.style.display=r.ok?'none':'block';errEl.textContent=r.msg}
+  el.style.borderColor=r.ok?'#22c55e':el.value?'#e94560':'';
+}
+
+/* ═══════════════════════════════════════════
+   AUTH STATE
+═══════════════════════════════════════════ */
+let currentUser=null; // {role:'admin'|'student', id?, student?}
+let authMode='login'; // 'login'|'signup'
+let authRole='admin';
+let pendingRoomId=null;
+
+/* ═══════════════════════════════════════════
+   MODAL HELPERS
+═══════════════════════════════════════════ */
+function openModal(id){document.getElementById(id).classList.add('open')}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+
+function openAuth(role){
+  authRole=role; authMode='login';
+  const isAdmin=role==='admin';
+  document.getElementById('auth-title').textContent=isAdmin?'Admin Login':'Student Login';
+  document.getElementById('auth-sub').textContent=isAdmin?'Admin access only':'Login or sign up to continue';
+  document.getElementById('admin-fields').style.display=isAdmin?'':'none';
+  document.getElementById('student-fields').style.display=isAdmin?'none':'';
+  document.getElementById('auth-toggle-row').style.display=isAdmin?'none':'';
+  document.getElementById('s-signup-extra').style.display='none';
+  document.getElementById('auth-submit').textContent='Login';
+  document.getElementById('auth-toggle-text').textContent="Don't have an account?";
+  document.getElementById('auth-toggle-link').textContent='Sign Up';
+  clearAuthInputs();
+  openModal('auth-modal');
+}
+
+function toggleStudentMode(){
+  authMode=authMode==='login'?'signup':'login';
+  const isSU=authMode==='signup';
+  document.getElementById('s-signup-extra').style.display=isSU?'':'none';
+  document.getElementById('auth-submit').textContent=isSU?'Create Account':'Login';
+  document.getElementById('auth-toggle-text').textContent=isSU?'Already have an account?':"Don't have an account?";
+  document.getElementById('auth-toggle-link').textContent=isSU?'Login':'Sign Up';
+  document.getElementById('auth-title').textContent=isSU?'Student Sign Up':'Student Login';
+}
+
+function clearAuthInputs(){
+  ['a-user','a-pass','s-name','s-receipt','s-cgpa','s-branch','s-user','s-pass'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){el.value='';el.style.borderColor=''}
+  });
+}
+
+/* ═══════════════════════════════════════════
+   AUTH SUBMIT
+═══════════════════════════════════════════ */
+function submitAuth(){
+  try{
+    if(authRole==='admin'){
+      const u=document.getElementById('a-user').value.trim();
+      const p=document.getElementById('a-pass').value;
+      if(!validateUsername(u).ok) throw new Error(validateUsername(u).msg);
+      if(!validatePassword(p).ok) throw new Error(validatePassword(p).msg);
+      if(u!=='admin'||p!=='Admin@123') throw new Error('Invalid username or password.');
+      currentUser={role:'admin'};
+      closeModal('auth-modal');
+      bootApp();
+    } else if(authMode==='signup'){
+      const name=document.getElementById('s-name').value;
+      const receipt=document.getElementById('s-receipt').value;
+      const cgpa=document.getElementById('s-cgpa').value;
+      const branch=document.getElementById('s-branch').value;
+      const username=document.getElementById('s-user').value.trim().toLowerCase();
+      const password=document.getElementById('s-pass').value;
+      const s=new Student(name,receipt,cgpa,branch,username,password);
+      s.validate();
+      // check if receipt exists in admin-added list
+      const existing=DB.students.find(st=>st.receiptNo===s.receiptNo);
+      if(existing && existing.username){
+        throw new Error('This receipt number already has an account. Please login.');
+      }
+      if(existing){
+        // admin pre-added, merge
+        existing.username=s.username;
+        existing.password=s.password;
+        existing.name=s.name;
+        existing.branch=s.branch||existing.branch;
+        persist();
+        currentUser={role:'student',id:existing.id,student:existing};
+      } else {
+        // new student, add to DB
+        const dup=DB.students.find(st=>st.username===s.username);
+        if(dup) throw new Error(`Username "${s.username}" already taken.`);
+        const dupR=DB.students.find(st=>st.receiptNo===s.receiptNo);
+        if(dupR) throw new Error(`Receipt number already registered.`);
+        DB.students.push(s);
+        persist();
+        currentUser={role:'student',id:s.id,student:s};
+      }
+      closeModal('auth-modal');
+      bootApp();
+    } else {
+      // student login
+      const username=document.getElementById('s-user').value.trim().toLowerCase();
+      const password=document.getElementById('s-pass').value;
+      if(!validateUsername(username).ok) throw new Error(validateUsername(username).msg);
+      if(!password) throw new Error('Password required.');
+      const s=DB.students.find(st=>st.username===username);
+      if(!s||!s.username) throw new Error('Account not found. Please sign up first.');
+      if(s.password!==password) throw new Error('Incorrect password.');
+      currentUser={role:'student',id:s.id,student:s};
+      closeModal('auth-modal');
+      bootApp();
+    }
+  } catch(e){toast(e.message,'error')}
+}
+
+/* ═══════════════════════════════════════════
+   APP BOOT / LOGOUT
+═══════════════════════════════════════════ */
+function bootApp(){
+  document.getElementById('landing').style.display='none';
+  document.getElementById('app').classList.add('open');
+  document.getElementById('topbar-role').textContent=currentUser.role==='admin'?'ADMIN':'STUDENT';
+  document.getElementById('topbar-user').textContent=
+    currentUser.role==='admin'?'admin':currentUser.student.name.split(' ')[0];
+  renderSidebar();
+  renderPages();
+  showPage(currentUser.role==='admin'?'dash':'my-room');
+}
+
+function logout(){
+  currentUser=null;pendingRoomId=null;
+  document.getElementById('app').classList.remove('open');
+  document.getElementById('landing').style.display='flex';
+}
+
+/* ═══════════════════════════════════════════
+   SIDEBAR & PAGES
+═══════════════════════════════════════════ */
+const adminNav=[
+  {id:'dash',icon:'📊',label:'Dashboard'},
+  {id:'students',icon:'👥',label:'Students'},
+  {id:'rooms-admin',icon:'🏠',label:'Rooms'},
+  {id:'notices',icon:'📢',label:'Notices'},
+  {id:'complaints',icon:'📋',label:'Complaints'},
+];
+const studentNav=[
+  {id:'my-room',icon:'🏠',label:'My Room'},
+  {id:'notices-s',icon:'📢',label:'Notices'},
+  {id:'complaint-s',icon:'📝',label:'Complaints'},
+];
+
+function renderSidebar(){
+  const nav=currentUser.role==='admin'?adminNav:studentNav;
+  const sb=document.getElementById('sidebar');
+  sb.innerHTML=nav.map(n=>`
+    <div class="nav-item" id="nav-${n.id}" onclick="showPage('${n.id}')">
+      <span>${n.icon}</span>${n.label}
+      ${n.id==='complaints'?`<span class="badge" id="complaint-badge">${DB.complaints.filter(c=>c.status==='Open').length||''}</span>`:''}
+    </div>`).join('');
+}
+
+function renderPages(){
+  const c=document.getElementById('content');
+  if(currentUser.role==='admin'){
+    c.innerHTML=`
+      <div class="page" id="page-dash">${buildDash()}</div>
+      <div class="page" id="page-students">${buildStudentsMgmt()}</div>
+      <div class="page" id="page-rooms-admin">${buildRoomsAdmin()}</div>
+      <div class="page" id="page-notices">${buildNotices()}</div>
+      <div class="page" id="page-complaints">${buildComplaints()}</div>`;
+  } else {
+    // refresh student ref
+    currentUser.student=DB.students.find(s=>s.id===currentUser.id)||currentUser.student;
+    c.innerHTML=`
+      <div class="page" id="page-my-room">${buildMyRoom()}</div>
+      <div class="page" id="page-notices-s">${buildNoticesStudent()}</div>
+      <div class="page" id="page-complaint-s">${buildComplaintStudent()}</div>`;
+  }
+}
+
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const pg=document.getElementById('page-'+id);
+  if(pg) pg.classList.add('active');
+  const nv=document.getElementById('nav-'+id);
+  if(nv) nv.classList.add('active');
+}
+
+function refresh(pageId){
+  renderPages();
+  renderSidebar();
+  showPage(pageId);
+}
+
+/* ═══════════════════════════════════════════
+   PRIORITY LOGIC
+═══════════════════════════════════════════ */
+function sortedStudents(){
+  return [...DB.students].sort((a,b)=>{
+    if(b.cgpa!==a.cgpa) return b.cgpa-a.cgpa;
+    return a.receiptNo.localeCompare(b.receiptNo);
+  });
+}
+
+// Returns the rank (1-based) of a student by id
+function studentRank(id){
+  return sortedStudents().findIndex(s=>s.id===id)+1;
+}
+
+// Can this student select a room right now?
+function canStudentSelectNow(studentId){
+  const sorted=sortedStudents();
+  const myIdx=sorted.findIndex(s=>s.id===studentId);
+  if(myIdx===-1) return false;
+  // All students with higher priority must have selected a room
+  for(let i=0;i<myIdx;i++){
+    if(!sorted[i].roomId) return false;
+  }
+  return true;
+}
+
+/* ═══════════════════════════════════════════
+   ROOM HELPERS
+═══════════════════════════════════════════ */
+function roomById(id){return DB.rooms.find(r=>r.id===id)}
+function roomOccupancy(room){return room.occupants.length}
+function roomFull(room){return room.occupants.length>=room.capacity}
+
+/* ═══════════════════════════════════════════
+   ADMIN PAGES
+═══════════════════════════════════════════ */
+function buildDash(){
+  const totalS=DB.students.length;
+  const assigned=DB.students.filter(s=>s.roomId).length;
+  const totalR=DB.rooms.length;
+  const fullR=DB.rooms.filter(r=>roomFull(r)).length;
+  const openC=DB.complaints.filter(c=>c.status==='Open').length;
+  return `<div class="page-title">Dashboard</div>
+  <div class="stats-row">
+    <div class="stat-card"><div class="num">${totalS}</div><div class="lbl">Total Students</div></div>
+    <div class="stat-card"><div class="num">${assigned}</div><div class="lbl">Rooms Assigned</div></div>
+    <div class="stat-card"><div class="num">${fullR}/${totalR}</div><div class="lbl">Rooms Full</div></div>
+    <div class="stat-card"><div class="num">${openC}</div><div class="lbl">Open Complaints</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Priority Queue</div>
+    ${buildPriorityQueue()}
+  </div>`;
+}
+
+function buildPriorityQueue(){
+  const sorted=sortedStudents();
+  if(!sorted.length) return `<div class="empty"><div class="eicon">👥</div><p>No students added yet</p></div>`;
+  return sorted.map((s,i)=>{
+    const done=!!s.roomId;
+    const isNext=!done && sorted.slice(0,i).every(x=>x.roomId);
+    const room=s.roomId?roomById(s.roomId):null;
+    return `<div class="queue-item ${done?'q-done':isNext?'q-next':''}">
+      <div class="q-rank">${i+1}</div>
+      <div class="q-info">
+        <div class="q-name">${escH(s.name)} <span style="font-size:.72rem;color:#aaa">${escH(s.receiptNo)}</span></div>
+        <div class="q-meta">CGPA: ${s.cgpa.toFixed(2)} · ${escH(s.branch||'—')}</div>
+      </div>
+      ${done?`<div class="q-room">Room ${escH(room?room.num:'?')}</div>`:
+        isNext?`<span class="tag tag-yellow">Next to pick</span>`:
+        `<span class="tag tag-gray">Waiting</span>`}
+    </div>`;
+  }).join('');
+}
+
+function buildStudentsMgmt(){
+  return `<div class="page-title">Students</div>
+  <div class="card">
+    <div class="card-title">Add Student <button class="btn-secondary" onclick="showAddStudentForm()">+ Add Manually</button></div>
+    <div id="add-student-form" style="display:none;margin-bottom:16px">
+      <div class="form-row">
+        <div class="field"><label>Name</label><input type="text" id="m-name" placeholder="Arjun Sharma" oninput="realtimeFeedback(this,'m-name-err',validateName)"><div class="err-msg" id="m-name-err"></div></div>
+        <div class="field"><label>Receipt No</label><input type="text" id="m-receipt" placeholder="RCP-2024-001" oninput="realtimeFeedback(this,'m-receipt-err',validateReceipt)"><div class="err-msg" id="m-receipt-err"></div></div>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>CGPA</label><input type="number" id="m-cgpa" placeholder="9.2" min="0" max="10" step="0.01" oninput="realtimeFeedback(this,'m-cgpa-err',validateCGPA)"><div class="err-msg" id="m-cgpa-err"></div></div>
+        <div class="field"><label>Branch</label><input type="text" id="m-branch" placeholder="Computer Science"></div>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn-primary" style="width:auto;padding:10px 24px" onclick="adminAddStudent()">Add Student</button>
+        <button class="btn-secondary" onclick="document.getElementById('add-student-form').style.display='none'">Cancel</button>
+      </div>
+      <hr class="divider">
+    </div>
+    <div class="upload-zone" onclick="document.getElementById('xl-input').click()">
+      <input type="file" id="xl-input" accept=".xlsx,.xls" onchange="importExcel(this)">
+      📊 <strong>Upload Excel Sheet</strong>
+      <p>Columns: Name, ReceiptNo, CGPA, Branch</p>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">All Students (${DB.students.length})</div>
+    ${buildStudentsTable()}
+  </div>`;
+}
+
+function buildStudentsTable(){
+  const sorted=sortedStudents();
+  if(!sorted.length) return `<div class="empty"><div class="eicon">👥</div><p>No students added yet</p></div>`;
+  return `<table>
+    <thead><tr><th>#</th><th>Name</th><th>Receipt No</th><th>CGPA</th><th>Branch</th><th>Account</th><th>Room</th><th></th></tr></thead>
+    <tbody>${sorted.map((s,i)=>{
+      const room=s.roomId?roomById(s.roomId):null;
+      return `<tr>
+        <td>${i+1}</td>
+        <td><strong>${escH(s.name)}</strong></td>
+        <td><code>${escH(s.receiptNo)}</code></td>
+        <td>${s.cgpa.toFixed(2)}</td>
+        <td>${escH(s.branch||'—')}</td>
+        <td>${s.username?`<span class="tag tag-green">✓ ${escH(s.username)}</span>`:'<span class="tag tag-gray">No account</span>'}</td>
+        <td>${room?`<span class="tag tag-blue">Room ${escH(room.num)}</span>`:'<span class="tag tag-gray">Not assigned</span>'}</td>
+        <td><button class="btn-danger" onclick="deleteStudent('${s.id}')">Delete</button></td>
+      </tr>`;
+    }).join('')}</tbody></table>`;
+}
+
+function showAddStudentForm(){
+  const f=document.getElementById('add-student-form');
+  f.style.display=f.style.display==='none'?'':'none';
+}
+
+function adminAddStudent(){
+  try{
+    const name=document.getElementById('m-name').value;
+    const receipt=document.getElementById('m-receipt').value;
+    const cgpa=document.getElementById('m-cgpa').value;
+    const branch=document.getElementById('m-branch').value;
+    const vn=validateName(name);if(!vn.ok)throw new Error(vn.msg);
+    const vr=validateReceipt(receipt);if(!vr.ok)throw new Error(vr.msg);
+    const vc=validateCGPA(cgpa);if(!vc.ok)throw new Error(vc.msg);
+    if(DB.students.find(s=>s.receiptNo===receipt.trim().toUpperCase()))throw new Error('Receipt number already exists.');
+    const s={id:Date.now()+Math.random(),name:name.trim(),receiptNo:receipt.trim().toUpperCase(),
+      cgpa:parseFloat(cgpa),branch:branch.trim(),username:null,password:null,roomId:null};
+    DB.students.push(s);persist();
+    toast(`${s.name} added.`,'success');
+    refresh('students');
+  }catch(e){toast(e.message,'error')}
+}
+
+function deleteStudent(id){
+  const s=DB.students.find(st=>st.id==id);
+  if(!s)return;
+  if(!confirm(`Delete ${s.name}? This will also free their room.`))return;
+  // free room
+  if(s.roomId){
+    const room=roomById(s.roomId);
+    if(room) room.occupants=room.occupants.filter(o=>o!==s.id);
+  }
+  DB.students=DB.students.filter(st=>st.id!=id);
+  DB.complaints=DB.complaints.filter(c=>c.studentId!=id);
+  persist();
+  toast(`${s.name} removed.`,'info');
+  refresh('students');
+}
+
+function importExcel(inp){
+  const file=inp.files[0];if(!file)return;
+  try{
+    if(!file.name.match(/\.(xlsx|xls)$/i))throw new Error('Please upload .xlsx or .xls');
+    const reader=new FileReader();
+    reader.onload=e=>{
+      try{
+        const wb=XLSX.read(e.target.result,{type:'array'});
+        const ws=wb.Sheets[wb.SheetNames[0]];
+        const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+        let added=0,errs=[];
+        for(let i=1;i<rows.length;i++){
+          const row=rows[i];
+          if(!row[0]&&!row[1]&&!row[2])continue;
+          try{
+            const vn=validateName(row[0]);if(!vn.ok)throw new Error(vn.msg);
+            const vr=validateReceipt(row[1]);if(!vr.ok)throw new Error(vr.msg);
+            const vc=validateCGPA(row[2]);if(!vc.ok)throw new Error(vc.msg);
+            const receipt=String(row[1]).trim().toUpperCase();
+            if(DB.students.find(s=>s.receiptNo===receipt)){errs.push(`Row ${i+1}: Duplicate receipt`);continue;}
+            DB.students.push({id:Date.now()+Math.random(),name:String(row[0]).trim(),
+              receiptNo:receipt,cgpa:parseFloat(row[2]),branch:String(row[3]||'').trim(),
+              username:null,password:null,roomId:null});
+            added++;
+          }catch(e2){errs.push(`Row ${i+1}: ${e2.message}`)}
+        }
+        persist();
+        if(added)toast(`${added} students imported.`,'success');
+        errs.slice(0,3).forEach(e=>toast(e,'error'));
+        refresh('students');
+      }catch(e){toast('Parse error: '+e.message,'error')}
+    };
+    reader.readAsArrayBuffer(file);
+  }catch(e){toast(e.message,'error')}
+  inp.value='';
+}
+
+/* ─── ADMIN ROOM VIEW ─── */
+function buildRoomsAdmin(){
+  const floors=[1,2,3];
+  return `<div class="page-title">Rooms Overview</div>
+  <div class="card">
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot avail"></div>Available</div>
+      <div class="legend-item"><div class="legend-dot full"></div>Full</div>
+    </div>
+    ${floors.map(f=>`
+      <div class="floor-label">Floor ${f}</div>
+      <div class="rooms-grid">
+        ${DB.rooms.filter(r=>r.floor===f).map(r=>{
+          const full=roomFull(r);
+          const occ=r.occupants.map(id=>{const s=DB.students.find(st=>st.id===id);return s?s.name:'?';}).join(', ');
+          return `<div class="room-cell ${full?'full':'avail'}" title="${occ||'Empty'}">
+            <span class="rnum">${r.num}</span>
+            <div class="rcap">${r.type}</div>
+            <div class="rocc">${r.occupants.length}/${r.capacity}</div>
+          </div>`;
+        }).join('')}
+      </div>`).join('')}
+  </div>`;
+}
+
+/* ─── NOTICES (ADMIN) ─── */
+function buildNotices(){
+  return `<div class="page-title">Notices</div>
+  <div class="card">
+    <div class="card-title">Post New Notice
+      <button class="btn-secondary" onclick="openModal('notice-modal')">+ New Notice</button>
+    </div>
+    <div class="notice-list" id="notice-list-admin">
+      ${DB.notices.length?DB.notices.slice().reverse().map(n=>`
+        <div class="notice-item">
+          <button class="del-notice" onclick="deleteNotice(${n.id})">✕</button>
+          <div class="notice-title">${escH(n.title)}</div>
+          <div class="notice-body">${escH(n.body)}</div>
+          <div class="notice-date">${n.date}</div>
+        </div>`).join(''):`<div class="empty"><div class="eicon">📢</div><p>No notices posted yet</p></div>`}
+    </div>
+  </div>`;
+}
+
+function addNotice(){
+  try{
+    const title=document.getElementById('n-title').value.trim();
+    const body=document.getElementById('n-body').value.trim();
+    if(!title)throw new Error('Title is required');
+    if(!body)throw new Error('Message is required');
+    DB.notices.push(new Notice(title,body));
+    persist();
+    closeModal('notice-modal');
+    document.getElementById('n-title').value='';
+    document.getElementById('n-body').value='';
+    toast('Notice posted.','success');
+    refresh('notices');
+  }catch(e){toast(e.message,'error')}
+}
+
+function deleteNotice(id){
+  DB.notices=DB.notices.filter(n=>n.id!=id);
+  persist();toast('Notice deleted.','info');refresh('notices');
+}
+
+/* ─── COMPLAINTS (ADMIN) ─── */
+function buildComplaints(){
+  const open=DB.complaints.filter(c=>c.status==='Open');
+  const resolved=DB.complaints.filter(c=>c.status==='Resolved');
+  return `<div class="page-title">Complaints</div>
+  <div class="card">
+    <div class="card-title">Open Complaints (${open.length})</div>
+    ${open.length?open.slice().reverse().map(c=>`
+      <div class="complaint-item">
+        <div class="c-header">
+          <div class="c-from">👤 ${escH(c.studentName)} <span class="tag tag-red" style="margin-left:6px">Open</span></div>
+          <button class="btn-secondary" onclick="resolveComplaint(${c.id})">Mark Resolved</button>
+        </div>
+        <div class="c-body">${escH(c.body)}</div>
+        <div class="c-date">${c.date}</div>
+      </div>`).join(''):`<div class="empty"><div class="eicon">✅</div><p>No open complaints</p></div>`}
+  </div>
+  ${resolved.length?`<div class="card">
+    <div class="card-title">Resolved (${resolved.length})</div>
+    ${resolved.slice().reverse().map(c=>`
+      <div class="complaint-item" style="opacity:.6">
+        <div class="c-header"><div class="c-from">👤 ${escH(c.studentName)} <span class="tag tag-green" style="margin-left:6px">Resolved</span></div></div>
+        <div class="c-body">${escH(c.body)}</div>
+        <div class="c-date">${c.date}</div>
+      </div>`).join('')}
+  </div>`:''}`;
+}
+
+function resolveComplaint(id){
+  const c=DB.complaints.find(x=>x.id==id);
+  if(c){c.status='Resolved';persist();toast('Complaint resolved.','success');refresh('complaints');}
+}
+
+/* ═══════════════════════════════════════════
+   STUDENT PAGES
+═══════════════════════════════════════════ */
+function buildMyRoom(){
+  const s=DB.students.find(st=>st.id===currentUser.id);
+  if(!s)return '<p>Error: student not found.</p>';
+  const rank=studentRank(s.id);
+  const total=DB.students.length;
+  const canSelect=canStudentSelectNow(s.id);
+  const myRoom=s.roomId?roomById(s.roomId):null;
+
+  return `<div class="page-title">Room Selection</div>
+  <div class="my-status-card">
+    <div style="display:flex;gap:40px;flex-wrap:wrap">
+      <div><div class="label">Your Name</div><div class="value">${escH(s.name)}</div></div>
+      <div><div class="label">Your CGPA</div><div class="value">${s.cgpa.toFixed(2)}</div></div>
+      <div><div class="label">Priority Rank</div><div class="value ${rank<=3?'green':rank<=Math.ceil(total/2)?'yellow':'red'}">#${rank} of ${total}</div></div>
+      <div><div class="label">Your Room</div><div class="value ${myRoom?'green':'yellow'}">${myRoom?'Room '+myRoom.num:'Not selected'}</div></div>
+    </div>
+    ${myRoom?'':'<div class="sub" style="margin-top:12px">'+
+      (canSelect?'✅ It\'s your turn! Select a room below.':
+      `⏳ Waiting for ${rank-1-(sortedStudents().slice(0,rank-1).filter(x=>x.roomId).length)} student(s) above you to select first.`)+
+    '</div>'}
+  </div>
+  ${myRoom?buildMyRoomSelected(myRoom):buildRoomPickerForStudent(s,canSelect)}`;
+}
+
+function buildMyRoomSelected(room){
+  return `<div class="card">
+    <div class="card-title">Your Room Details</div>
+    <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap">
+      <div style="background:#eff6ff;border:2px solid #3b82f6;border-radius:14px;padding:24px 32px;text-align:center">
+        <div style="font-size:2.5rem;font-weight:900;color:#1d4ed8">Room ${escH(room.num)}</div>
+        <div style="font-size:.82rem;color:#3b82f6;margin-top:4px">${room.type} · Floor ${room.floor}</div>
+      </div>
+      <div>
+        <div style="font-size:.85rem;color:#555;line-height:2">
+          <div><strong>Type:</strong> ${room.type}</div>
+          <div><strong>Floor:</strong> ${room.floor}</div>
+          <div><strong>Capacity:</strong> ${room.capacity} person(s)</div>
+          <div><strong>Occupants:</strong> ${room.occupants.length}/${room.capacity}</div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function buildRoomPickerForStudent(student,canSelect){
+  const floors=[1,2,3];
+  return `<div class="card">
+    <div class="card-title">Select a Room</div>
+    ${!canSelect?`<div class="priority-banner">⏳ You cannot select a room yet. Students with higher priority must select first.</div>`:''}
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot avail"></div>Available</div>
+      <div class="legend-item"><div class="legend-dot full"></div>Full</div>
+      <div class="legend-item"><div class="legend-dot locked"></div>Not your turn yet</div>
+    </div>
+    ${floors.map(f=>`
+      <div class="floor-label">Floor ${f}</div>
+      <div class="rooms-grid">
+        ${DB.rooms.filter(r=>r.floor===f).map(r=>{
+          const full=roomFull(r);
+          const cls=full?'full':!canSelect?'locked':'avail';
+          const onclick=(!full&&canSelect)?`selectRoom('${r.id}')`:'';
+          const occ=r.occupants.length;
+          return `<div class="room-cell ${cls}" ${onclick?`onclick="${onclick}"`:''}
+            title="${full?'Full':!canSelect?'Not your turn':'Click to select'}">
+            <span class="rnum">${r.num}</span>
+            <div class="rcap">${r.type}</div>
+            <div class="rocc" style="color:${full?'#ef4444':!canSelect?'#d97706':'#22c55e'}">${occ}/${r.capacity}</div>
+          </div>`;
+        }).join('')}
+      </div>`).join('')}
+  </div>`;
+}
+
+/* ─── ROOM SELECTION ─── */
+function selectRoom(roomId){
+  pendingRoomId=roomId;
+  const room=roomById(roomId);
+  if(!room)return;
+  document.getElementById('confirm-room-preview').style.display='';
+  document.getElementById('confirm-room-num').textContent='Room '+room.num;
+  document.getElementById('confirm-room-info').textContent=`${room.type} · Floor ${room.floor} · ${room.occupants.length}/${room.capacity} occupied`;
+  document.getElementById('confirm-msg').textContent=`You are about to select Room ${room.num}. Once confirmed, this cannot be changed.`;
+  openModal('confirm-modal');
+}
+
+function finaliseRoomSelection(){
+  try{
+    if(!pendingRoomId)throw new Error('No room selected.');
+    const student=DB.students.find(s=>s.id===currentUser.id);
+    if(!student)throw new Error('Student not found.');
+    if(student.roomId)throw new Error('You already have a room assigned.');
+    if(!canStudentSelectNow(student.id))throw new Error('Higher priority students have not selected yet.');
+    const room=roomById(pendingRoomId);
+    if(!room)throw new Error('Room not found.');
+    if(roomFull(room))throw new Error('This room is now full. Please select another.');
+    // assign
+    student.roomId=room.id;
+    room.occupants.push(student.id);
+    currentUser.student=student;
+    persist();
+    closeModal('confirm-modal');
+    pendingRoomId=null;
+    toast(`Room ${room.num} successfully assigned to you!`,'success');
+    refresh('my-room');
+  }catch(e){toast(e.message,'error')}
+}
+
+/* ─── NOTICES (STUDENT) ─── */
+function buildNoticesStudent(){
+  return `<div class="page-title">Notices</div>
+  <div class="card">
+    <div class="notice-list">
+      ${DB.notices.length?DB.notices.slice().reverse().map(n=>`
+        <div class="notice-item">
+          <div class="notice-title">📢 ${escH(n.title)}</div>
+          <div class="notice-body">${escH(n.body)}</div>
+          <div class="notice-date">${n.date}</div>
+        </div>`).join(''):`<div class="empty"><div class="eicon">📢</div><p>No notices yet</p></div>`}
+    </div>
+  </div>`;
+}
+
+/* ─── COMPLAINT (STUDENT) ─── */
+function buildComplaintStudent(){
+  const s=DB.students.find(st=>st.id===currentUser.id);
+  const myComplaints=DB.complaints.filter(c=>c.studentId===currentUser.id);
+  return `<div class="page-title">Raise a Complaint</div>
+  <div class="card">
+    <div class="card-title">Submit Complaint</div>
+    <div class="field"><label>Your Issue</label>
+      <textarea id="c-body" rows="4" placeholder="Describe your complaint about the hostel..." style="resize:vertical"></textarea>
+    </div>
+    <button class="btn-primary" style="width:auto;padding:10px 24px" onclick="submitComplaint()">Submit</button>
+  </div>
+  ${myComplaints.length?`<div class="card">
+    <div class="card-title">Your Complaints</div>
+    ${myComplaints.slice().reverse().map(c=>`
+      <div class="complaint-item">
+        <div class="c-header">
+          <span class="tag ${c.status==='Open'?'tag-red':'tag-green'}">${c.status}</span>
+        </div>
+        <div class="c-body">${escH(c.body)}</div>
+        <div class="c-date">${c.date}</div>
+      </div>`).join('')}
+  </div>`:''}`;
+}
+
+function submitComplaint(){
+  try{
+    const body=document.getElementById('c-body').value.trim();
+    if(!body||body.length<5)throw new Error('Please describe your complaint (min 5 chars).');
+    const s=DB.students.find(st=>st.id===currentUser.id);
+    DB.complaints.push(new Complaint(currentUser.id,s?s.name:'Unknown',body));
+    persist();
+    document.getElementById('c-body').value='';
+    toast('Complaint submitted. Admin will review it.','success');
+    // update badge
+    renderSidebar();
+    refresh('complaint-s');
+  }catch(e){toast(e.message,'error')}
+}
+
+/* ═══════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════ */
+function toast(msg,type='info'){
+  const el=document.createElement('div');
+  el.className=`toast-item ${type}`;
+  el.textContent=msg;
+  document.getElementById('toast').appendChild(el);
+  setTimeout(()=>el.remove(),3800);
+}
+
+/* ═══════════════════════════════════════════
+   UTIL
+═══════════════════════════════════════════ */
+function escH(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+// Allow pressing Enter in auth modal
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&document.getElementById('auth-modal').classList.contains('open'))submitAuth();
+});
+</script>
+</body>
+</html>
