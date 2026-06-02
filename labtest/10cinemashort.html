@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Cinema Seat Booking System</h2>
+
+<div id="seats"></div>
+
+<br><br>
+
+<select id="mode">
+    <option value="">Select Payment Mode</option>
+    <option>Card</option>
+    <option>UPI</option>
+    <option>Cash</option>
+</select>
+
+<br><br>
+
+<button onclick="pay()">Make Payment</button>
+<button onclick="cancelBooking()">Cancel Ticket</button>
+
+<h3 id="msg"></h3>
+
+<script>
+
+let selected = [];
+
+
+for(let i=1; i<=10; i++){
+
+    let btn = document.createElement("button");
+
+    btn.innerHTML = "Seat " + i;
+
+    btn.onclick = function(){
+
+        if(selected.includes(i)){
+
+            selected = selected.filter(s => s != i);
+
+            btn.innerHTML = "Seat " + i;
+        }
+        else{
+
+            selected.push(i);
+
+            btn.innerHTML = "Seat " + i + " (Selected)";
+        }
+    };
+
+    seats.appendChild(btn);
+}
+
+
+// Payment
+function pay(){
+
+    if(selected.length == 0){
+
+        msg.innerHTML = "Please Select Seats";
+        return;
+    }
+
+    if(mode.value == ""){
+
+        msg.innerHTML = "Please Select Payment Mode";
+        return;
+    }
+
+    msg.innerHTML =
+    "Payment Successful!<br>" +
+    "Payment Mode: " + mode.value + "<br>" +
+    "Booked Seats: " + selected.join(", ");
+}
+
+
+// Cancel Booking
+function cancelBooking(){
+
+    selected = [];
+
+    let buttons =
+    seats.getElementsByTagName("button");
+
+    for(let i=0; i<buttons.length; i++){
+
+        buttons[i].innerHTML =
+        "Seat " + (i+1);
+    }
+
+    msg.innerHTML =
+    "Booking Cancelled Successfully";
+}
+
+</script>
+
+</body>
+</html>

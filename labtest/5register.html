@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>User Registration Form</h2>
+<p id="result">Enter details to register</p>
+Username:
+<input type="text" id="username">
+<br><br>
+Password:
+<input type="password" id="password">
+<br><br>
+<button onclick="register()">Register</button>
+
+<script>
+function User(username, password) {
+    this.username = username;
+    this.password = password;
+}
+
+function register() {
+    let uname = document.getElementById("username").value;
+    let pwd = document.getElementById("password").value;
+
+    if (uname.length < 5) {
+        document.getElementById("result").innerHTML =
+            "Username must be at least 5 characters long";
+        return;
+    }
+
+    if (pwd.length < 6) {
+        document.getElementById("result").innerHTML =
+            "Password must be at least 6 characters long";
+        return;
+    }
+
+    if (!pwd.includes("@")) {
+        document.getElementById("result").innerHTML =
+            "Password must contain '@'";
+        return;
+    }
+
+    let user = new User(uname, pwd);
+
+    document.getElementById("result").innerHTML =
+        "Registration Successful!<br>Username: " +
+        user.username.toUpperCase();
+}
+</script>
+
+</body>
+</html>

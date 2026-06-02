@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h3>Fibonacci Generator</h3>
+<input type="number" id="num" placeholder="Enter number">
+<button onclick="generate()">Generate</button>
+<p id="result"></p>
+
+
+
+<script>
+function fib(n) {
+    if (n <= 1) return n;
+    return fib(n-1) + fib(n-2);
+}
+function generate() {
+    let n = Number(document.getElementById("num").value);
+    let res = "";
+    try {
+        if (n < 0) throw "Enter positive number";
+        for (let i = 0; i < n; i++) {
+            res += fib(i) + " ";
+        }
+        document.getElementById("result").innerHTML = res;
+    } catch (e) {
+        document.getElementById("result").innerHTML = "Error: " + e;
+    }
+}
+</script>
+</body>
+</html>

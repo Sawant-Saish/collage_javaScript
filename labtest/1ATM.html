@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h3>ATM Transaction</h3>
+
+<input type="number" id="amt" placeholder="Enter amount">
+
+<button onclick="withdraw()">Withdraw</button>
+<button onclick="deposit()">Deposit</button>
+
+<p id="msg"></p>
+
+<script>
+let balance = 5000;
+
+function withdraw() {
+    let amt = Number(document.getElementById("amt").value);
+    try {
+        if (amt <= 0) throw "Enter valid amount";
+        if (amt > balance) throw "Insufficient balance";
+
+        balance -= amt;
+
+        document.getElementById("msg").innerHTML +=
+            "Withdrawal Successful! Balance: ₹" + balance + "<br>";
+
+    } catch (e) {
+        document.getElementById("msg").innerHTML += "Error: " + e + "<br>";
+    }
+}
+
+function deposit() {
+    let amt = Number(document.getElementById("amt").value);
+    try {
+        if (amt <= 0) throw "Enter valid amount";
+
+        balance += amt;
+
+        document.getElementById("msg").innerHTML +=
+            "Deposit Successful! Balance: ₹" + balance + "<br>";
+
+    } catch (e) {
+        document.getElementById("msg").innerHTML += "Error: " + e + "<br>";
+    }
+}
+</script>
+
+</body>
+</html>

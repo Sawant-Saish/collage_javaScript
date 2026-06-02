@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Event Propagation Debugger</title>
+<style>
+body{text-align:center;font-family:Arial}
+.box{padding:40px;margin:15px auto;width:70%;border:1px solid}
+#outer{background:#ffd6d6}
+#middle{background:#d6ffd6}
+#inner{background:#d6e4ff}
+#log{height:200px;overflow:auto;border:1px solid;padding:10px;text-align:left}
+</style>
+</head>
+<body>
+
+<h2>Event Propagation Debugger Tool</h2>
+<p>Click inside nested boxes to observe Capturing and Bubbling phases.</p>
+
+<button onclick="log.innerHTML=''">Clear Log</button>
+
+<div id="outer" class="box">
+OUTER
+<div id="middle" class="box">
+MIDDLE
+<div id="inner" class="box">INNER</div>
+</div>
+</div>
+
+<div id="log"></div>
+
+<script>
+const log=document.getElementById("log");
+
+function show(msg){
+    log.innerHTML+=msg+"<br>";
+    log.scrollTop=log.scrollHeight;
+}
+
+["outer","middle","inner"].forEach(id=>{
+    let e=document.getElementById(id);
+
+    e.addEventListener("click",()=>show("Capturing: "+id),true);
+    e.addEventListener("click",()=>show("Bubbling: "+id));
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Smart Task & Feedback System</title>
+<style>
+.done{ text-decoration:line-through; color:gray; }
+.card{ border:1px solid black; padding:10px; margin:10px 0; }
+</style>
+</head>
+<body>
+
+<h2>Task Manager</h2>
+
+<input type="text" id="taskInput" placeholder="Enter Task">
+<button id="addTask" onclick="add()">Add Task</button>
+
+<ul id="taskList"></ul>
+
+<hr>
+
+<h2>Feedback Form</h2>
+
+<form id="feedbackForm">
+    Name:
+    <input type="text" id="name"><br><br>
+
+    Message:
+    <textarea id="message"></textarea><br><br>
+
+    <button type="submit">Submit Feedback</button>
+</form>
+
+<h3>Feedback List</h3>
+
+<div id="feedbackList"></div>
+<p id="result"></p>
+
+<script>
+
+function add() {
+
+    let task = document.getElementById("taskInput").value;
+
+    if (task == "") return;
+
+    let li = document.createElement("li");
+
+    li.innerHTML = `
+        <span class="text">${task}</span>
+        <button class="complete">Complete</button>
+        <button class="edit">Edit</button>
+        <button class="delete">Delete</button>
+    `;
+
+    document.getElementById("taskList").appendChild(li);
+    document.getElementById("taskInput").value = "";
+};
+
+document.getElementById("taskList").addEventListener("click", function (event) {
+
+    let li = event.target.parentElement;
+
+    if (event.target.className == "delete")
+        li.remove();
+
+    if (event.target.className == "complete")
+        li.querySelector(".text").classList.toggle("done");
+
+    if (event.target.className == "edit") {
+        let updated = prompt(
+            "Edit Task",
+            li.querySelector(".text").innerText
+        );
+
+        if (updated)
+            li.querySelector(".text").innerText = updated;
+    }
+});
+
+document.getElementById("feedbackForm").addEventListener("submit", function (event) {
+
+    event.preventDefault();
+
+    let name = document.getElementById("name").value;
+    let msg = document.getElementById("message").value;
+
+    if (name == "" || msg == "") {
+        document.getElementById("result").innerHTML = "Fill all fields";
+        return;
+    }
+
+    let card = document.createElement("div");
+    card.className = "card";
+
+    card.innerHTML = `
+        <b>${name}</b> : ${msg}
+        <br>
+        <button class="removeFeedback">Delete</button>
+    `;
+
+    document.getElementById("feedbackList").appendChild(card);
+
+    document.getElementById("feedbackForm").reset();
+    document.getElementById("result").innerHTML = "Feedback Submitted";
+});
+
+document.getElementById("feedbackList").addEventListener("click", function (event) {
+
+    if (event.target.className == "removeFeedback")
+        event.target.parentElement.remove();
+});
+
+</script>
+
+</body>
+</html>

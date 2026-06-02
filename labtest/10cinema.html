@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Cinema Seat Booking</title>
+<style>
+body{font-family:Arial;text-align:center;background:#f4f4f4}
+#screen{width:400px;margin:15px auto;padding:10px;background:#000;color:#fff}
+#seats{width:420px;margin:auto;display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+button{padding:12px;cursor:pointer}
+.available{background:lightgreen}
+.selected{background:orange}
+.booked{background:red;color:#fff}
+#paymentBox,#cancelBox{width:320px;margin:15px auto;padding:15px;background:#fff}
+#paymentBox{display:none}
+input,select{padding:6px;margin:5px}
+</style>
+</head>
+<body>
+
+<h2>Cinema Seat Booking System</h2>
+
+<div id="screen">SCREEN</div>
+<div id="seats"></div>
+
+<p>Selected Seats: <span id="count">0</span></p>
+<p>Total Amount: ₹<span id="amount">0</span></p>
+
+<button onclick="openPayment()">Proceed to Payment</button>
+<button onclick="resetSelection()">Reset</button>
+
+<div id="paymentBox">
+<h3>Payment Gateway</h3>
+
+<select id="payMode" onchange="showFields()">
+<option value="">Select Payment Mode</option>
+<option value="card">Card</option>
+<option value="upi">UPI</option>
+<option value="cash">Cash</option>
+</select>
+
+<div id="extraFields"></div>
+
+<button onclick="makePayment()">Pay Now</button>
+<p id="msg"></p>
+</div>
+
+<div id="cancelBox">
+<h3>Cancel Booked Seat</h3>
+<input type="number" id="cancelSeat" placeholder="Seat Number">
+<button onclick="cancelSeatBooking()">Cancel Seat</button>
+<p id="cancelMsg"></p>
+</div>
+
+<script>
+let selected=[],booked=[],price=200;
+
+for(let i=1;i<=20;i++){
+    let b=document.createElement("button");
+    b.innerText=i;
+    b.className=Math.random()<0.2?"booked":"available";
+    if(b.className=="booked") booked.push(i+"");
+    b.onclick=()=>selectSeat(b);
+    seats.appendChild(b);
+}
+
+function selectSeat(b){
+    if(b.classList.contains("booked")) return alert("Seat already booked");
+
+    let n=b.innerText;
+
+    if(b.classList.contains("selected")){
+        b.className="available";
+        selected=selected.filter(x=>x!=n);
+    }else{
+        b.className="selected";
+        selected.push(n);
+    }
+    update();
+}
+
+function update(){
+    count.innerText=selected.length;
+    amount.innerText=selected.length*price;
+}
+
+function resetSelection(){
+    document.querySelectorAll(".selected")
+    .forEach(b=>b.className="available");
+
+    selected=[];
+    update();
+    paymentBox.style.display="none";
+}
+
+function openPayment(){
+    if(!selected.length) return alert("Select seats first");
+    paymentBox.style.display="block";
+}
+
+function showFields(){
+    extraFields.innerHTML=
+    payMode.value=="card" ?
+    `<input id="card" placeholder="Card Number"><br>
+     <input id="cvv" placeholder="CVV">`
+    :
+    payMode.value=="upi" ?
+    `<input id="upi" placeholder="UPI ID">`
+    :
+    payMode.value=="cash" ?
+    `<p>Pay Cash at Counter</p>` : "";
+}
+
+function makePayment(){
+    let m=payMode.value;
+
+    if(!m) return alert("Select payment mode");
+
+    if(m=="card" && (card.value.length!=16 || cvv.value.length!=3))
+        return alert("Invalid Card Details");
+
+    if(m=="upi" && !upi.value.includes("@"))
+        return alert("Invalid UPI ID");
+
+    document.querySelectorAll(".selected").forEach(b=>{
+        b.className="booked";
+        booked.push(b.innerText);
+    });
+
+    msg.innerText="Seats Booked: "+selected.join(", ");
+    selected=[];
+    update();
+}
+
+function cancelSeatBooking(){
+    let s=cancelSeat.value,found=false;
+
+    document.querySelectorAll("#seats button").forEach(b=>{
+        if(b.innerText==s && b.classList.contains("booked")){
+            b.className="available";
+            booked=booked.filter(x=>x!=s);
+            found=true;
+        }
+    });
+
+    cancelMsg.innerText=found ?
+    "Seat "+s+" Cancelled Successfully" :
+    "Invalid or Not Booked Seat";
+}
+</script>
+
+</body>
+</html>

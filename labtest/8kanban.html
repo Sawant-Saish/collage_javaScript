@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Kanban Board</title>
+<style>
+body{font-family:Arial;margin:20px;background:#f4f4f4}
+h2,.top{text-align:center}
+.board{display:flex;gap:15px}
+.column{flex:1;min-height:300px;padding:10px;background:#fff;border-radius:5px}
+.task{background:#dff0ff;padding:8px;margin:8px 0;cursor:grab}
+.drag-over{background:#d0ffd0}
+</style>
+</head>
+<body>
+
+<h2>Drag & Drop Kanban Board</h2>
+
+<div class="top">
+    <input type="text" id="taskInput" placeholder="Enter task">
+    <button onclick="addTask()">Add Task</button>
+</div>
+
+<div class="board">
+    <div class="column" id="todo"><h3>To Do</h3></div>
+    <div class="column" id="progress"><h3>In Progress</h3></div>
+    <div class="column" id="done"><h3>Done</h3></div>
+</div>
+
+<script>
+let dragged;
+
+function addTask(){
+    let text = taskInput.value;
+    if(!text) return alert("Enter task");
+
+    let task = document.createElement("div");
+    task.className = "task";
+    task.draggable = true;
+    task.innerText = text;
+
+    task.ondragstart = () => dragged = task;
+    task.ondragend = () => dragged = null;
+
+    todo.appendChild(task);
+    taskInput.value = "";
+}
+
+document.querySelectorAll(".column").forEach(col=>{
+    col.ondragover = e => {
+        e.preventDefault();
+        col.classList.add("drag-over");
+    };
+
+    col.ondragleave = () => col.classList.remove("drag-over");
+
+    col.ondrop = () => {
+        col.classList.remove("drag-over");
+        col.appendChild(dragged);
+    };
+});
+</script>
+
+</body>
+</html>

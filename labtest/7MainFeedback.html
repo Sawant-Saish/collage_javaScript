@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Customer Feedback System</h2>
+
+<form id="feedbackForm">
+    Name:
+    <input type="text" id="name"><br><br>
+
+    Email:
+    <input type="email" id="email"><br><br>
+
+    Rating:
+    <select id="rating">
+        <option value="">Select</option>
+        <option>1</option>
+        <option>2</option>
+        <option>3</option>
+        <option>4</option>
+        <option>5</option>
+    </select><br><br>
+
+    Feedback:
+    <textarea id="feedback"></textarea><br><br>
+
+    <button type="submit">Submit Feedback</button>
+</form>
+
+<p id="result"></p>
+
+<h3>Feedback List</h3>
+<div id="feedbackList"></div>
+
+<script>
+document.getElementById("feedbackForm").addEventListener("submit", function(event) {
+    event.preventDefault();
+
+    let name = document.getElementById("name").value;
+    let email = document.getElementById("email").value;
+    let rating = document.getElementById("rating").value;
+    let feedback = document.getElementById("feedback").value;
+
+    if (name === "" || email === "" || rating === "" || feedback === "") {
+        document.getElementById("result").innerHTML =
+            "Please fill all fields";
+        return;
+    }
+
+    let card = document.createElement("div");
+
+    card.style.border = "1px solid black";
+    card.style.padding = "10px";
+    card.style.margin = "10px 0";
+
+    card.innerHTML =
+        "<b>Name:</b> " + name +
+        "<br><b>Email:</b> " + email +
+        "<br><b>Rating:</b> " + rating +
+        "<br><b>Feedback:</b> " + feedback +
+        "<br><br>" +
+        "<button class='edit'>Edit</button> " +
+        "<button class='delete'>Delete</button>";
+
+    document.getElementById("feedbackList").appendChild(card);
+
+    document.getElementById("result").innerHTML =
+        "Feedback submitted successfully";
+
+    document.getElementById("feedbackForm").reset();
+});
+
+document.getElementById("feedbackList").addEventListener("click", function(event) {
+    let card = event.target.parentElement;
+
+    if (event.target.className === "delete") {
+        card.remove();
+    }
+
+    if (event.target.className === "edit") {
+        let details = card.innerText.split("\n");
+
+        document.getElementById("name").value =
+            details[0].split(": ")[1];
+
+        document.getElementById("email").value =
+            details[1].split(": ")[1];
+
+        document.getElementById("rating").value =
+            details[2].split(": ")[1];
+
+        document.getElementById("feedback").value =
+            details[3].split(": ")[1];
+
+        card.remove();
+    }
+});
+</script>
+
+</body>
+</html>

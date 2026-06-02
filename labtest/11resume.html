@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Resume Builder</h2>
+
+
+
+
+
+
+<input id="name" placeholder="Name">
+<input id="edu" placeholder="Education"><br><br>
+
+<input id="skill" placeholder="Skill">
+<button onclick="add('skills','skill')">Add Skill</button>
+
+<input id="project" placeholder="Project">
+<button onclick="add('projects','project')">Add Project</button>
+
+<input id="cert" placeholder="Certification">
+<button onclick="add('certs','cert')">Add Certification</button>
+
+<button onclick="buildResume()">Generate Resume</button>
+
+<h3>Resume</h3>
+<div id="resume"></div>
+
+<script>
+let skills=[], projects=[], certs=[];
+
+function add(type,id){
+    let value = document.getElementById(id).value;
+    if(value){
+        eval(type).push(value);
+        document.getElementById(id).value="";
+    }
+}
+
+
+
+function buildResume() {
+    document.getElementById("resume").innerHTML =
+        "<div style='border:2px solid black;padding:20px;width:500px;text-align:center;'>" +
+        "<h2>RESUME</h2>" +
+        "<hr>" +
+        "<h3>" + document.getElementById("name").value + "</h3>" +
+        "<p><b>Education:</b> " + document.getElementById("edu").value + "</p>" +
+        "<p><b>Skills:</b> " + skills.join(", ") + "</p>" +
+        "<p><b>Projects:</b> " + projects.join(", ") + "</p>" +
+        "<p><b>Certifications:</b> " + certs.join(", ") + "</p>" +
+        "</div>";
+}
+
+</script>
+
+</body>
+</html>
