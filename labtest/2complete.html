@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JavaScript Program on Recursion and Functions</title>
+
+<style>
+body{
+    font-family: Arial;
+    text-align: center;
+    background: #f4f4f4;
+}
+
+.container{
+    margin: 50px auto;
+    padding: 20px;
+    width: 300px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+}
+
+input,button{
+    margin: 5px;
+    padding: 10px;
+    width: 80%;
+}
+
+h2{
+    color: #333;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>Calculator</h2>
+
+    <input type="number" id="num1" placeholder="Enter first number">
+    <input type="number" id="num2" placeholder="Enter second number">
+
+    <br>
+
+    <button onclick="calculate('+')">Add</button>
+    <button onclick="calculate('-')">Subtract</button>
+    <button onclick="calculate('*')">Multiply</button>
+    <button onclick="calculate('/')">Divide</button>
+
+    <h3 id="result"></h3>
+</div>
+
+<div class="container">
+    <h2>Factorial (Recursion)</h2>
+
+    <input type="number" id="factNum" placeholder="Enter number">
+
+    <button onclick="findFactorial()">Find Factorial</button>
+
+    <h3 id="factResult"></h3>
+</div>
+
+<div class="container">
+    <h2>Palindrome Checker</h2>
+
+    <input type="text" id="textInput" placeholder="Enter text">
+
+    <button onclick="checkPalindrome()">Check</button>
+
+    <h3 id="palResult"></h3>
+</div>
+
+<script>
+
+function calculate(op){
+
+    let a = parseFloat(document.getElementById("num1").value);
+    let b = parseFloat(document.getElementById("num2").value);
+
+    let result;
+
+    if(isNaN(a) || isNaN(b)){
+        result = "Enter valid numbers";
+    }
+    else{
+        switch(op){
+            case '+':
+                result = a + b;
+                break;
+
+            case '-':
+                result = a - b;
+                break;
+
+            case '*':
+                result = a * b;
+                break;
+
+            case '/':
+                result = (b != 0) ? a / b : "Cannot divide by zero";
+                break;
+        }
+    }
+
+    document.getElementById("result").innerText = result;
+}
+
+function factorial(n){
+    if(n == 0 || n == 1)
+        return 1;
+
+    return n * factorial(n - 1);
+}
+
+function findFactorial(){
+
+    let num = parseInt(document.getElementById("factNum").value);
+
+    let result = (num >= 0)
+        ? factorial(num)
+        : "Enter positive number";
+
+    document.getElementById("factResult").innerText = result;
+}
+
+function isPalindrome(str){
+
+    str = str.toLowerCase().replace(/[^a-z0-9]/g,'');
+
+    if(str.length <= 1)
+        return true;
+
+    if(str[0] != str[str.length - 1])
+        return false;
+
+    return isPalindrome(str.slice(1,-1));
+}
+
+function checkPalindrome(){
+
+    let text = document.getElementById("textInput").value;
+
+    let result = isPalindrome(text)
+        ? "Palindrome"
+        : "Not Palindrome";
+
+    document.getElementById("palResult").innerText = result;
+}
+
+</script>
+
+</body>
+</html>
